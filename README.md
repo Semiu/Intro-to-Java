@@ -5,6 +5,9 @@
 My solutions to the exercises in the book are arranged on chapter-by-chapter basis. The codes are well-commented for complete understanding of readers.
 And the problems are also re-produced.
 
+Note: The .class files are the compiled versions of the .java files.
+The solutions were firstly complied using `javac MyFile.java` before they are run using `java MyFile` at the terminal.
+
 ![](images/bookcover.jpg)
 
 
