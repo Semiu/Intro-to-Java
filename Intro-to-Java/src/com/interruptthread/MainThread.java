@@ -1,14 +1,12 @@
-/**
- * This package, by the implementation of the classes therein, illustrates how Java runs its threads of the same process.
- * @author Semiu
- *
- */
+package com.interruptthread;
 
-package com.threads;
+import com.threads.MyRunnable;
+import com.threads.OneThread;
 
 public class MainThread {
 
 	public static void main(String[] args) {
+		
 		// TODO Auto-generated method stub
 		System.out.println("Hello from the main thread!");
 		
@@ -27,7 +25,7 @@ public class MainThread {
 		Thread myRunnable = new Thread(new MyRunnable() {
 			@Override
 			public void run() {
-				
+				//super.run();
 				System.out.println("A thread from anonymous run");
 			}
 		});
