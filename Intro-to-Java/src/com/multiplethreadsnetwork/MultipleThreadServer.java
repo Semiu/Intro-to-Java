@@ -1,18 +1,16 @@
 /**
  * This is the implementation of multiple clients on multiple threads.
- * This avoids setting Thread.sleep(), as done in the single thread, to ensure there is no output stream blockage.
+ * This avoids output stream blockage from multiple clients or speedy inputs from a client.
  * This works with the EchoForMCinMT class
  * The client side program is in the ClientSide folder
  */
 
 package com.multiplethreadsnetwork;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+
 import java.net.ServerSocket;
-import java.net.Socket;
+
 
 public class MultipleThreadServer {
 
@@ -20,33 +18,15 @@ public class MultipleThreadServer {
 		// TODO Auto-generated method stub
 		try(ServerSocket serverSocket = new ServerSocket(5000)){
 			
-			
 			while(true) {
-				// Socket to connect with the client(s) who will be on the same port but different sockets
-				Socket socket = serverSocket.accept();
-				System.out.println("Client connected!");
 				
-				//Input streams for the server
-				BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				new EchoForMCinMT(serverSocket.accept()).start();
 				
-				//Output streams for the server
-				PrintWriter output = new PrintWriter(socket.getOutputStream(), true); //set true to flush the output stream automatically
+				//A break-down implementation of the code in line 24 is 27 to 31
+				//Socket socket = serverSocket.accept();
+				//EchoForMCinMT echoForMCinMT = new EchoForMCinMT(socket);
+				//echoForMCinMT.start();
 				
-				//Continously takes input from the client
-				String echoString = input.readLine();
-				
-				//Putting the server to momentary sleep after very input so that its output is delivered to avoid blockage
-				try {
-					Thread.sleep(15000);
-				}catch(InterruptedException e) {
-					System.out.println("Thread interrupted");				
-				}
-				
-				if(echoString.equals("exit")) {
-					//if the input is "exit"
-					break;
-				}
-				output.println("Echo from multithreaded server: " + echoString);
 			}
 			
 		}catch(IOException e) {
