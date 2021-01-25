@@ -1,5 +1,6 @@
 /**
- * The client side of the single-threaded client-server communication implementation
+ * The client side of the client-server communication implementation
+ * It works for both the single and multiple thread server
  * @author Semiu
  *
  */

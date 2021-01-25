@@ -1,6 +1,7 @@
 /**
- *This represents the server side of the single thread client - server communication
- *The client side programs are in the ClientSide folder
+ *This represents the server side of the single thread and single client 
+ * client - server communication
+ *The client side program is in the ClientSide folder
  * @author Semiu
  *
  */

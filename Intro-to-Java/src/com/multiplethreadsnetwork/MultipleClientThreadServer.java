@@ -1,7 +1,5 @@
 /**
- * This is the implementation of multiple clients on multiple threads.
- * This avoids setting Thread.sleep(), as done in the single thread, to ensure there is no output stream blockage.
- * This works with the EchoForMCinMT class
+ * This is the implementation of multiple clients on a SingleThreadServer class to accept multiple connections.
  * The client side program is in the ClientSide folder
  */
 
@@ -14,13 +12,13 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class MultipleThreadServer {
+public class MultipleClientThreadServer {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try(ServerSocket serverSocket = new ServerSocket(5000)){
 			
-			
+			//Lines 24 to 31 taken from here in the single client -single thread implementation
 			while(true) {
 				// Socket to connect with the client(s) who will be on the same port but different sockets
 				Socket socket = serverSocket.accept();
