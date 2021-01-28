@@ -28,7 +28,7 @@ public class EchoForMCinMT extends Thread {
 			
 			while(true) {
 				String echoString = input.readLine();
-				System.out.println("Client received! " + echoString);
+				System.out.println("Client's input received! " + echoString);
 				if(echoString.equals("exit")) {
 					break;
 				}

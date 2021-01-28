@@ -22,7 +22,7 @@ public class MultipleThreadServer {
 				
 				new EchoForMCinMT(serverSocket.accept()).start();
 				
-				//A break-down implementation of the code in line 24 is 27 to 31
+				//A break-down implementation of the code in line 23 is 26 to 28
 				//Socket socket = serverSocket.accept();
 				//EchoForMCinMT echoForMCinMT = new EchoForMCinMT(socket);
 				//echoForMCinMT.start();
