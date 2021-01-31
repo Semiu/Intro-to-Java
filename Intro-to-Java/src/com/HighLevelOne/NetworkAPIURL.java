@@ -14,23 +14,29 @@ public class NetworkAPIURL {
 			//URI uri = new URI("db://username:password@myserver.com:5000/catalogue/phones?os=android#samsung");
 			
 			
-			URI baseUri = new URI("http://username:password@myserver.com:5000");
-			URI uri = new URI("/catalogue/phones?os=android#samsung");
+			URI baseUri = new URI("http://username:password@mynewserver.com:5000");
+			URI uri1 = new URI("/catalogue/phones?os=android#samsung");
+			URI uri2 = new URI("/catalogue/tvs?manufacturer=samsung");
+			URI uri3 = new URI("/stores/locations?zip=12345");
 			
-			URI resolvedUri = baseUri.resolve(uri);
+			URI resolvedUri1 = baseUri.resolve(uri1);
+			URI resolvedUri2 = baseUri.resolve(uri2);
+			URI resolvedUri3 = baseUri.resolve(uri3);
 			
-			URL url = resolvedUri.toURL();
-			System.out.println("URL = " + url);
+			URL url1 = resolvedUri1.toURL();
+			System.out.println("URL = " + url1);
 			
-			//System.out.println("Scheme = " + uri.getScheme());
-			//System.out.println("Scheme-specific part = " + uri.getSchemeSpecificPart());
-			//System.out.println("Authority = " + uri.getAuthority());
-			//System.out.println("User info = " + uri.getUserInfo());
-			//System.out.println("Host = " + uri.getHost());
-			//System.out.println("Port ="+ uri.getPort());
-			//System.out.println("Path ="+ uri.getPath());
-			//System.out.println("Query=" + uri.getQuery());
-			//System.out.println("Fragment = " + uri.getFragment());
+			URL url2 = resolvedUri2.toURL();
+			System.out.println("URL = " + url2);
+			
+			URL url3 = resolvedUri3.toURL();
+			System.out.println("URL = " + url3);
+			
+			//Relative URI
+			URI relativizeURI = baseUri.relativize(resolvedUri3);
+			System.out.println("Relative URI = " + relativizeURI);
+			
+			
 			
 		}catch(URISyntaxException e) {
 			System.out.println("URI Bad Syntax: " + e.getMessage());
