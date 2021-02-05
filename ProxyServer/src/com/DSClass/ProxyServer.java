@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 public class ProxyServer {
 
@@ -50,6 +54,7 @@ public class ProxyServer {
 		}	
 				
 		// Create the Server Socket for the Proxy 
+		//Maybe this will go to RequestHandler.java
 		try {
 			
 			proxySocket = new ServerSocket(proxyPort);
@@ -66,7 +71,8 @@ public class ProxyServer {
 		catch (IOException io) {
 			System.out.println("IO exception when connecting to client");
 		}
-		
+		//server socket creation ends
+
 		//When connection is successful 
 		/**
 		 * A serverSocket to listen on the port (proxyPort) and accept new socket connections
@@ -91,7 +97,7 @@ public class ProxyServer {
 				
 			} catch (SocketException e) {
 				
-				// Socket exception is triggered by management system to shut down the proxy 
+				// Socket exception to shut down the proxy 
 				System.out.println("Server closed");
 				
 			} catch (IOException e) {
@@ -115,14 +121,25 @@ public class ProxyServer {
 	}
 
 	//Method to write info into the log file.
-	//
 	public synchronized void writeLog(String info) {
-		
 			/**
 			 * To do: write string (info) to the log file, and add the current time stamp 
 			 * e.g. String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-			 *
 			*/
+		String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+		boolean append = true;
+		try {
+			Logger logger = Logger.getLogger("com.DSClass.snippets.core");
+			//Current time stamp is added to the log
+			FileHandler handler = new FileHandler(logFileName+timeStamp, append);
+			
+			logger.addHandler(handler);
+			 
+		}catch(IOException e) {
+			e.printStackTrace();
+			
+		}
 	}
+	
 
 }

@@ -30,12 +30,12 @@ public class RequestHandler extends Thread {
 	//ProxyServer proxyServer;
 
 	//We only use the clientSocket, why passing the proxyServer as an argument
+	//Maybe the proxyServer would be used to "Create a socket to connect to the web server (default port 80)"
 	public RequestHandler(Socket clientSocket) {
 
 		
 		this.clientSocket = clientSocket;
 		
-
 		//this.proxyServer = proxyServer;
 
 		try {
@@ -80,7 +80,8 @@ public class RequestHandler extends Thread {
 		OutputStream outToServer;
 		
 		// Create Buffered output stream to write to cached copy of file
-		//String fileName = "cached/" + generateFileName() + ".dat";
+		//We changed this from generateFileName() to generateRandomFileName() because that is the existing function
+		String fileName = "cached/" + generateRandomFileName() + ".dat";
 		
 		// to handle binary content, byte is used
 		byte[] serverReply = new byte[4096];
@@ -141,8 +142,4 @@ public class RequestHandler extends Thread {
 	
 	
 	
-	
-	
-	
-
 }
