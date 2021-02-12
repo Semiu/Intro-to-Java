@@ -54,7 +54,10 @@ public class ProxyServer {
 		}	
 				
 		// Create the Server Socket for the Proxy 
-		//Maybe this will go to RequestHandler.java
+		/**
+		 * A serverSocket to listen on the port (proxyPort) and accept new socket connections
+		 *  (Remember to catch Exceptions!)
+		 */
 		try {
 			
 			proxySocket = new ServerSocket(proxyPort);
@@ -73,11 +76,8 @@ public class ProxyServer {
 		}
 		//server socket creation ends
 
-		//When connection is successful 
-		/**
-		 * A serverSocket to listen on the port (proxyPort) and accept new socket connections
-		 *  (Remember to catch Exceptions!)
-		 */
+		//When connection is successful
+		//Maybe this will go to RequestHandler.java
 		while(running){
 			try {
 				// proxySocket.accept() Blocks until a connection is made
