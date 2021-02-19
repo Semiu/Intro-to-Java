@@ -3,12 +3,14 @@ package com.DSClass;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -36,23 +38,16 @@ public class RequestHandler extends Thread {
 	//We only use the clientSocket, why passing the proxyServer as an argument
 	//Also, the object instance of RequestHandler.java to start a thread takes only clientSocket as argument
 	
-	//public RequestHandler(Socket clientSocket, ProxyServer proxyServer) {
-	//localhost, port number
 	public RequestHandler(Socket clientSocket) {
 
 		
 		this.clientSocket = clientSocket;
-		
-		//this.proxyServer = proxyServer;
 
 		try {
 			clientSocket.setSoTimeout(2000);
-
-			inFromClient = clientSocket.getInputStream();
-			outToClient = clientSocket.getOutputStream();
-			
-			//proxyToClientBufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			//proxyToClientBufferedWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+	
+			proxyToClientBufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			proxyToClientBufferedWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -67,16 +62,12 @@ public class RequestHandler extends Thread {
 		/**
 		 * To do: Process the requests from a client. In particular
 		*/
-		
-		//String requestStringReader;
-		String requestStringSocket;
-		byte [] clientRequest = null;
+		String requestStringReader;
 		String fileName = null;
 		
 		try {
 		
-			//requestStringReader = proxyToClientBufferedReader.readLine();
-			requestStringSocket = inFromClient.toString();
+			requestStringReader = proxyToClientBufferedReader.readLine();
 			
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -84,48 +75,68 @@ public class RequestHandler extends Thread {
 			return;
 		}
 		
+		// Parsing requestStringReader
+		
+		//Getting the request type
+		String request = requestStringReader.substring(0,requestStringReader.indexOf(' '));
+
+		//remove request type and space
+		String urlString = requestStringReader.substring(requestStringReader.indexOf(' ')+1);
+
+		// Remove everything past next space
+		urlString = urlString.substring(0, urlString.indexOf(' '));
+
+		// Prepend http:// if necessary to create correct URL
+		if(!urlString.substring(0,4).equals("http")){
+			String temp = "http://";
+			urlString = temp + urlString;
+			}
+
 		// Get the Request type
-		//String requestFromReader = requestStringReader.substring(0,requestStringReader.indexOf(' '));
-		
 		/**
-		 * (1) Check the request type, only process GET request and ignore others
-		 * (3) Otherwise, call method proxyServertoClient to process the GET request when the request Method id GET
-		 * and 
-		 */
+		* (1) Check the request type, only process GET request and ignore others
+		* (3) Otherwise, call method proxyServertoClient to process the GET request when the request Method id GET
+		* and 
+		*/
+		
 		try {
-		
-		URL url = new URL(requestStringSocket);
-		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-		String requestMethod= conn.getRequestMethod();
-		
-		if(requestMethod.equals("GET") ) {
 			
-			if(Paths.get(fileName) != null) {
-				/** (2) If the url of GET request has been cached, respond with cached content
-				 * Another option to try here is to write a getCachedPage () for ProxyServer, taking url as an argument.
-				 * Then, check in the if bracket, instead of the Paths.get(fileName)
-				 * I stick to this pending testing to be consistent with the sendCachedInfoToClient(fileName) provided
-				 * in the template.    
-				*/
+			//To show the list of established connection with the machine
+			if (request.equals("CONNECT")) {System.out.println(urlString + " is an established connection from this machine");}
+			
+			//Process the GET method
+			if (request.equals("GET")) {
+				
+				//Call the method for processing the GET method
+				proxyServertoClient(urlString);
+			 
+				
+				if(Paths.get(fileName) != null) {
+					/** (2) If the url of GET request has been cached, respond with cached content
+					 * Another option to try here is to write a getCachedPage () for ProxyServer, taking url as an argument.
+					 * Then, check in the if bracket, instead of the Paths.get(fileName)
+					 * I stick to this pending testing to be consistent with the sendCachedInfoToClient(fileName) provided
+					 * in the template.    
+					*/
 				sendCachedInfoToClient(fileName);
+				}
+			 
+			 
+			}else {
+				/**only process GET request and ignore others*/
+				System.out.println("Only GET method is processed!");
 			}
-			else {
-				//handleRequest(requestStringSocket); - A function of this signature will be written if need be.
-				proxyServertoClient(clientRequest);
-			}
-			
-		} else {
-			/**only process GET request and ignore others*/
-			System.out.println("Only GET method is processed!");
-			
-		}
-			
+		
+		
 		}catch(Exception e) {
-			System.out.println("URL is incorrect!");
+			System.out.println(urlString + " is a bad URL!");
 			
 		}
 
 	}
+	//End of run method
+	
+	
 	
 	//private boolean proxyServertoClient(byte[] clientRequest) {
 	/**
@@ -134,60 +145,83 @@ public class RequestHandler extends Thread {
 	 * when the HTTP request is 'GET'.
 	 * We changed this from generateFileName() to generateRandomFileName() because that is the existing function
 	 * @param clientRequest
+	 * Since proxyServertoClient method is what is expected to be called to process the GET request, it only makes sense it
+	 * takes the urlString as the argument 
 	 */
-	private void proxyServertoClient(byte[] clientRequest) {
+	//private void proxyServertoClient(byte[] clientRequest) {
+	
+	//http://www.columbia.edu/~fdc/sample.html 
+	private void proxyServertoClient(String urlString) {
+		
 
 		FileOutputStream fileWriter = null;
-		//Socket serverSocket = null;
-		//InputStream inFromServer = null;
-		//OutputStream outToServer = null;
-		
-		//
-		String clientURL = clientRequest.toString();
 		
 		// Create File output stream to write to cached copy of file
 		String fileName = "cached/" + generateRandomFileName() + ".dat";
 		
-		
-		
 		// to handle binary content, byte is used
 		byte[] serverReply = new byte[4096];
+		
+		StringBuffer serverResponse = new StringBuffer();
 		
 		/**
 		 * To do:
 		*/
+		URL treatURL;
+				
 		try {
 			/*
-			 * (1) Create a socket to connect to the web server (default port 80)
+			 * (1) Create a socket to connect to the web server (default port 80)(port extracted as the option, for testing)
 			 */
+			treatURL = new URL (urlString);
+			String domainURL = treatURL.getHost();
 			
 			// Get actual IP associated with this URL through DNS
-			InetAddress address = InetAddress.getByName(clientURL);
+			InetAddress address = InetAddress.getByName(domainURL);
 			
-			//Port set at 80
+			//Port set at 80 
 			Socket proxyToServerSocket = new Socket(address, 80);
 			proxyToServerSocket.setSoTimeout(5000);
 			
 			/*
-			 * (2) Send client's request (clientRequest) to the web server, you may want to use flush() after writing.
+			 * (2) Send client's request (clientRequest) to the web server HttpURLConnection
 			 */
-	
+			// Create the URL
+			URL remoteURL = new URL(urlString);
+			// Create a connection to remote server
+			HttpURLConnection proxyToServerCon = (HttpURLConnection)remoteURL.openConnection();
+			
+			proxyToServerCon.setRequestProperty("User-Agent", "Mozilla/5.0");  
+			
+			int responseCode = proxyToServerCon.getResponseCode();
+			
+			System.out.println("The response code is " + responseCode);
+			
 			// Client and Remote will both start sending data to proxy at this point
 			// Proxy needs to asynchronously read data from each party and send it to the other party
 			//Create a Buffered Writer between proxy and remote
-			BufferedWriter proxyToServerBufferWriter = new BufferedWriter(new OutputStreamWriter(proxyToServerSocket.getOutputStream()));
-			proxyToServerBufferWriter.write(clientRequest.toString());
 			
-			
-			proxyToServerBufferWriter.flush();
-			
+			if (responseCode == 200) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(proxyToServerCon.getInputStream()));
+				
+				String inputLine;
+				
+				while ((inputLine = in.readLine()) != null) {
+					
+					serverResponse.append(inputLine);
+				}
+				
+				in.close();
+			}
 			// Create Buffered Reader from proxy and remote
 			BufferedReader proxyToServerBufferReader = new BufferedReader(new InputStreamReader(proxyToServerSocket.getInputStream()));
+						
+			BufferedWriter proxyToServerBufferWriter = new BufferedWriter(new OutputStreamWriter(proxyToServerSocket.getOutputStream()));
 			
 			//
 			fileWriter = new FileOutputStream(fileName);
 			
-			fileWriter.write(clientRequest);
+			fileWriter.write(serverReply);
 			
 			/*
 			 * (3) Use a while loop to read all responses from web server and send back to client
@@ -207,6 +241,7 @@ public class RequestHandler extends Thread {
 						clientSocket.getOutputStream().write(serverReply, 0, read);
 						
 						if (proxyToServerSocket.getInputStream().available() < 1) {
+							// you may want to use flush() after writing.
 							clientSocket.getOutputStream().flush();
 						}
 					
@@ -215,6 +250,7 @@ public class RequestHandler extends Thread {
 				} while (read>=0);
 				
 			}catch(Exception e) {
+				System.out.println("Reading the server reply was the problem!");
 				
 			}
 			/*
@@ -237,9 +273,13 @@ public class RequestHandler extends Thread {
 				proxyToServerBufferReader.close();
 			}
 			
-		}catch (Exception e) {
+		}catch (MalformedURLException e) {
 			e.printStackTrace();
-		}	
+			System.out.println("Shit happens while processing " + urlString);
+			
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -284,5 +324,7 @@ public class RequestHandler extends Thread {
 		}
 		return sb.toString();
 	}
+	
+	
 	
 }
