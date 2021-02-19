@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -35,7 +34,8 @@ public class RequestHandler extends Thread {
 	ProxyServer proxyServer;
 
 	//We only use the clientSocket, why passing the proxyServer as an argument
-	//Maybe the proxyServer would be used to "Create a socket to connect to the web server (default port 80)"
+	//Also, the object instance of RequestHandler.java to start a thread takes only clientSocket as argument
+	
 	//public RequestHandler(Socket clientSocket, ProxyServer proxyServer) {
 	//localhost, port number
 	public RequestHandler(Socket clientSocket) {
@@ -145,8 +145,10 @@ public class RequestHandler extends Thread {
 		//
 		String clientURL = clientRequest.toString();
 		
-		// Create Buffered output stream to write to cached copy of file
+		// Create File output stream to write to cached copy of file
 		String fileName = "cached/" + generateRandomFileName() + ".dat";
+		
+		
 		
 		// to handle binary content, byte is used
 		byte[] serverReply = new byte[4096];
@@ -175,10 +177,17 @@ public class RequestHandler extends Thread {
 			//Create a Buffered Writer between proxy and remote
 			BufferedWriter proxyToServerBufferWriter = new BufferedWriter(new OutputStreamWriter(proxyToServerSocket.getOutputStream()));
 			proxyToServerBufferWriter.write(clientRequest.toString());
+			
+			
 			proxyToServerBufferWriter.flush();
 			
 			// Create Buffered Reader from proxy and remote
 			BufferedReader proxyToServerBufferReader = new BufferedReader(new InputStreamReader(proxyToServerSocket.getInputStream()));
+			
+			//
+			fileWriter = new FileOutputStream(fileName);
+			
+			fileWriter.write(clientRequest);
 			
 			/*
 			 * (3) Use a while loop to read all responses from web server and send back to client
@@ -192,7 +201,7 @@ public class RequestHandler extends Thread {
 					/*
 					 * (4) Write the web server's response to a cache file, put the request URL and cache file name to the cache Map
 					 */
-					//ProxyServer.putCache(serverReply.toString(), fileName);
+					ProxyServer.putCache(serverReply.toString(), fileName);
 					
 					if (read > 0) {
 						clientSocket.getOutputStream().write(serverReply, 0, read);
@@ -263,7 +272,7 @@ public class RequestHandler extends Thread {
 	}
 	
 	
-	// Generates a random file name  
+	//Generates a random file name  
 	public String generateRandomFileName() {
 
 		String ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
@@ -275,15 +284,5 @@ public class RequestHandler extends Thread {
 		}
 		return sb.toString();
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 }

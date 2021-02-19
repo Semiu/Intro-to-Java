@@ -17,7 +17,7 @@ public class ProxyServer {
 	/**
 	 * Declaring the class instance variables
 	 */
-	//cache is a Map: the key is the URL and the value is the file name of the file that stores the cached content
+	static //cache is a Map: the key is the URL and the value is the file name of the file that stores the cached content
 	Map<String, String> cache;
 	
 	//socket variable for the server
@@ -33,9 +33,11 @@ public class ProxyServer {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		//I assume that this startServer should take port number as argument (Perhaps this would come from the browwer)
+		//I assume that this startServer should take port number as argument (Perhaps this would come from the broswer)
+		//But currently placed at port 80 pending testing
+		
 		//new ProxyServer().startServer(Integer.parseInt(args[0]));
-		new ProxyServer().startServer(8080); //testing
+		new ProxyServer().startServer(80); //testing
 
 	}
 	
@@ -63,6 +65,7 @@ public class ProxyServer {
 			proxySocket = new ServerSocket(proxyPort);
 			
 			System.out.println("Waiting for client on port " + proxySocket.getLocalPort() + "..");
+			//running takes true value when socket is successfully created
 			running = true;
 		} 
 
@@ -88,10 +91,6 @@ public class ProxyServer {
 				 */
 				Thread thread = new Thread(new RequestHandler(socket));
 				
-				// Key a reference to each thread so they can be joined later if necessary
-				//This is if there is a need to take track of the threads. ArrayList of operating threads would be created
-				//operatingThreads.add(thread);
-				
 				//Start the thread
 				thread.start();	
 				
@@ -115,8 +114,9 @@ public class ProxyServer {
 		return cache.get(hashcode);
 	}
 
-	//Method to save into the cache Map.
-	public void putCache(String hashcode, String fileName) {
+	//Method to save into the cache Map. I made it a static function so that I can call ProxyServer.putCache()
+	//in the RequestHandler.java file
+	public static void putCache(String hashcode, String fileName) {
 		cache.put(hashcode, fileName);
 	}
 
