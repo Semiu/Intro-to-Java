@@ -36,7 +36,6 @@ public class ProxyServer {
 		//I assume that this startServer should take port number as argument (Perhaps this would come from the broswer)
 		//But currently placed at port 80 pending testing
 		
-		//new ProxyServer().startServer(Integer.parseInt(args[0]));
 		new ProxyServer().startServer(80); //testing
 
 	}
@@ -82,6 +81,7 @@ public class ProxyServer {
 		//When connection is successful
 		//Maybe this will go to RequestHandler.java
 		while(running){
+			
 			try {
 				// proxySocket.accept() Blocks until a connection is made
 				Socket socket = proxySocket.accept();
@@ -127,9 +127,12 @@ public class ProxyServer {
 			 * e.g. String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
 			*/
 		String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+		
 		boolean append = true;
+		
 		try {
 			Logger logger = Logger.getLogger("com.DSClass.snippets.core");
+			
 			//Current time stamp is added to the log
 			FileHandler handler = new FileHandler(logFileName+timeStamp, append);
 			

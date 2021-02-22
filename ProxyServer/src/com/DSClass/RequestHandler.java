@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -27,7 +28,7 @@ public class RequestHandler extends Thread {
 
 	OutputStream outToClient;
 	
-	byte[] request = new byte[1024];
+	//byte[] request = new byte[1024];
 
 	BufferedReader proxyToClientBufferedReader;
 
@@ -47,7 +48,6 @@ public class RequestHandler extends Thread {
 			clientSocket.setSoTimeout(2000);
 	
 			proxyToClientBufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			proxyToClientBufferedWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -110,23 +110,19 @@ public class RequestHandler extends Thread {
 				//Call the method for processing the GET method
 				proxyServertoClient(urlString);
 			 
-				
-				if(Paths.get(fileName) != null) {
-					/** (2) If the url of GET request has been cached, respond with cached content
-					 * Another option to try here is to write a getCachedPage () for ProxyServer, taking url as an argument.
-					 * Then, check in the if bracket, instead of the Paths.get(fileName)
-					 * I stick to this pending testing to be consistent with the sendCachedInfoToClient(fileName) provided
-					 * in the template.    
-					*/
-				sendCachedInfoToClient(fileName);
-				}
-			 
-			 
 			}else {
 				/**only process GET request and ignore others*/
 				System.out.println("Only GET method is processed!");
 			}
-		
+			if(Paths.get(fileName) != null) {
+				/** (2) If the url of GET request has been cached, respond with cached content
+				 * Another option to try here is to write a getCachedPage () for ProxyServer, taking url as an argument.
+				 * Then, check in the if bracket, instead of the Paths.get(fileName)
+				 * I stick to this pending testing to be consistent with the sendCachedInfoToClient(fileName) provided
+				 * in the template.    
+				*/
+			sendCachedInfoToClient(fileName);
+			}
 		
 		}catch(Exception e) {
 			System.out.println(urlString + " is a bad URL!");
@@ -153,14 +149,11 @@ public class RequestHandler extends Thread {
 	//http://www.columbia.edu/~fdc/sample.html 
 	private void proxyServertoClient(String urlString) {
 		
-
-		FileOutputStream fileWriter = null;
-		
 		// Create File output stream to write to cached copy of file
 		String fileName = "cached/" + generateRandomFileName() + ".dat";
 		
 		// to handle binary content, byte is used
-		byte[] serverReply = new byte[4096];
+		//byte[] serverReply = new byte[4096];
 		
 		StringBuffer serverResponse = new StringBuffer();
 		
@@ -202,16 +195,21 @@ public class RequestHandler extends Thread {
 			//Create a Buffered Writer between proxy and remote
 			
 			if (responseCode == 200) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(proxyToServerCon.getInputStream()));
+				BufferedReader toClient = 	new BufferedReader(new InputStreamReader(proxyToServerCon.getInputStream()));
 				
 				String inputLine;
 				
-				while ((inputLine = in.readLine()) != null) {
+				while ((inputLine = toClient.readLine()) != null) {
 					
-					serverResponse.append(inputLine);
+					serverResponse.append(inputLine.getBytes());
+					
+					outToClient.write(inputLine.getBytes(StandardCharsets.UTF_8));
+					
+					outToClient.flush();
+					
 				}
 				
-				in.close();
+				toClient.close();
 			}
 			// Create Buffered Reader from proxy and remote
 			BufferedReader proxyToServerBufferReader = new BufferedReader(new InputStreamReader(proxyToServerSocket.getInputStream()));
@@ -219,9 +217,9 @@ public class RequestHandler extends Thread {
 			BufferedWriter proxyToServerBufferWriter = new BufferedWriter(new OutputStreamWriter(proxyToServerSocket.getOutputStream()));
 			
 			//
-			fileWriter = new FileOutputStream(fileName);
+			FileOutputStream	fileWriter = new FileOutputStream(fileName);
 			
-			fileWriter.write(serverReply);
+			fileWriter.close();
 			
 			/*
 			 * (3) Use a while loop to read all responses from web server and send back to client
@@ -231,14 +229,15 @@ public class RequestHandler extends Thread {
 				int read;
 				
 				do {
-					read = proxyToServerSocket.getInputStream().read(serverReply);
+				
+					read =  proxyToServerSocket.getInputStream().read();
 					/*
 					 * (4) Write the web server's response to a cache file, put the request URL and cache file name to the cache Map
 					 */
-					ProxyServer.putCache(serverReply.toString(), fileName);
+					ProxyServer.putCache(serverResponse.toString(), fileName);
 					
 					if (read > 0) {
-						clientSocket.getOutputStream().write(serverReply, 0, read);
+						clientSocket.getOutputStream().write(read);
 						
 						if (proxyToServerSocket.getInputStream().available() < 1) {
 							// you may want to use flush() after writing.
@@ -272,6 +271,8 @@ public class RequestHandler extends Thread {
 			if(proxyToServerBufferReader != null){
 				proxyToServerBufferReader.close();
 			}
+			
+			
 			
 		}catch (MalformedURLException e) {
 			e.printStackTrace();
