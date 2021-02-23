@@ -150,24 +150,22 @@ public class RequestHandler extends Thread {
 	private void proxyServertoClient(String urlString) {
 		
 		// Create File output stream to write to cached copy of file
-		String fileName = "cached/" + generateRandomFileName() + ".dat";
+		String fileName = "cached/" + generateRandomFileName() + ".txt";
 		
 		// to handle binary content, byte is used
-		//byte[] serverReply = new byte[4096];
-		
+				
 		StringBuffer serverResponse = new StringBuffer();
 		
 		/**
 		 * To do:
 		*/
-		URL treatURL;
-				
+		URL fullURL;				
 		try {
 			/*
 			 * (1) Create a socket to connect to the web server (default port 80)(port extracted as the option, for testing)
 			 */
-			treatURL = new URL (urlString);
-			String domainURL = treatURL.getHost();
+			fullURL = new URL (urlString);
+			String domainURL = fullURL.getHost();
 			
 			// Get actual IP associated with this URL through DNS
 			InetAddress address = InetAddress.getByName(domainURL);
@@ -205,6 +203,7 @@ public class RequestHandler extends Thread {
 					
 					outToClient.write(inputLine.getBytes(StandardCharsets.UTF_8));
 					
+	
 					outToClient.flush();
 					
 				}
@@ -325,7 +324,6 @@ public class RequestHandler extends Thread {
 		}
 		return sb.toString();
 	}
-	
 	
 	
 }

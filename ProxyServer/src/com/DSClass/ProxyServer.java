@@ -24,7 +24,7 @@ public class ProxyServer {
 	ServerSocket proxySocket;
 	
 	//The file name of the file to store the cached content
-	String logFileName = "log.txt";
+	String fileName = "log.txt";
 	
 	//Declare a running boolean variable to track when client-server connection is successful
 	boolean running;
@@ -33,17 +33,14 @@ public class ProxyServer {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		//I assume that this startServer should take port number as argument (Perhaps this would come from the broswer)
-		//But currently placed at port 80 pending testing
-		
-		new ProxyServer().startServer(80); //testing
+		//But currently placed at port 80
+		new ProxyServer().startServer(80); 
 
 	}
 	
 	//startServer method of the ProxyServer class 
 	void startServer(int proxyPort) {
 		
-
 		cache = new ConcurrentHashMap<>();
 
 		// create the directory to store cached files. 
@@ -79,7 +76,7 @@ public class ProxyServer {
 		//server socket creation ends
 
 		//When connection is successful
-		//Maybe this will go to RequestHandler.java
+		//An object the Thread class is created and its takes RequestHandler for each client connection
 		while(running){
 			
 			try {
@@ -134,7 +131,7 @@ public class ProxyServer {
 			Logger logger = Logger.getLogger("com.DSClass.snippets.core");
 			
 			//Current time stamp is added to the log
-			FileHandler handler = new FileHandler(logFileName+timeStamp, append);
+			FileHandler handler = new FileHandler(fileName+timeStamp, append);
 			
 			logger.addHandler(handler);
 			 
